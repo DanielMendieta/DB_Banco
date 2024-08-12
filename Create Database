@@ -1,0 +1,132 @@
+-- Crear la base de datos
+CREATE DATABASE BancoDB;
+GO
+
+-- Usar la base de datos
+USE BancoDB;
+GO
+
+-- Tabla Clientes
+CREATE TABLE Clientes (
+    ClienteID INT PRIMARY KEY IDENTITY(1,1),
+    Nombre NVARCHAR(100) NOT NULL,
+    Apellido NVARCHAR(100) NOT NULL,
+    FechaNacimiento DATE NOT NULL,
+    Genero CHAR(1),
+    Email NVARCHAR(100) UNIQUE NOT NULL,
+    Telefono NVARCHAR(20) NOT NULL
+);
+
+-- Tabla Cuentas
+CREATE TABLE Cuentas (
+    CuentaID INT PRIMARY KEY IDENTITY(1,1),
+    ClienteID INT FOREIGN KEY REFERENCES Clientes(ClienteID),
+    NumeroCuenta NVARCHAR(20) UNIQUE NOT NULL,
+    TipoCuenta NVARCHAR(50) NOT NULL,
+    FechaApertura DATE NOT NULL,
+    Saldo DECIMAL(18,2) NOT NULL
+);
+
+-- Tabla Transacciones
+CREATE TABLE Transacciones (
+    TransaccionID INT PRIMARY KEY IDENTITY(1,1),
+    CuentaID INT FOREIGN KEY REFERENCES Cuentas(CuentaID),
+    FechaTransaccion DATETIME NOT NULL,
+    Monto DECIMAL(18,2) NOT NULL,
+    TipoTransaccion NVARCHAR(50) NOT NULL, -- Deposito, Retiro, Transferencia, etc.
+    Descripcion NVARCHAR(255)
+);
+
+-- Tabla Prestamos
+CREATE TABLE Prestamos (
+    PrestamoID INT PRIMARY KEY IDENTITY(1,1),
+    ClienteID INT FOREIGN KEY REFERENCES Clientes(ClienteID),
+    MontoPrestamo DECIMAL(18,2) NOT NULL,
+    TasaInteres DECIMAL(5,2) NOT NULL,
+    FechaPrestamo DATE NOT NULL,
+    FechaVencimiento DATE NOT NULL,
+    Estado NVARCHAR(50) NOT NULL
+);
+
+-- Tabla PagosPrestamo
+CREATE TABLE PagosPrestamo (
+    PagoID INT PRIMARY KEY IDENTITY(1,1),
+    PrestamoID INT FOREIGN KEY REFERENCES Prestamos(PrestamoID),
+    FechaPago DATE NOT NULL,
+    MontoPagado DECIMAL(18,2) NOT NULL
+);
+
+-- Tabla Tarjetas
+CREATE TABLE Tarjetas (
+    TarjetaID INT PRIMARY KEY IDENTITY(1,1),
+    ClienteID INT FOREIGN KEY REFERENCES Clientes(ClienteID),
+    NumeroTarjeta NVARCHAR(20) UNIQUE NOT NULL,
+    TipoTarjeta NVARCHAR(50) NOT NULL, -- Crédito, Débito
+    FechaExpiracion DATE NOT NULL,
+    CodigoSeguridad NVARCHAR(4) NOT NULL
+);
+
+-- Tabla Sucursales
+CREATE TABLE Sucursales (
+    SucursalID INT PRIMARY KEY IDENTITY(1,1),
+    NombreSucursal NVARCHAR(100) NOT NULL,
+    Direccion NVARCHAR(255) NOT NULL,
+    Ciudad NVARCHAR(100) NOT NULL,
+    Provincia NVARCHAR(100) NOT NULL,
+    CodigoPostal NVARCHAR(10) NOT NULL
+);
+
+-- Tabla Empleados
+CREATE TABLE Empleados (
+    EmpleadoID INT PRIMARY KEY IDENTITY(1,1),
+    Nombre NVARCHAR(100) NOT NULL,
+    Apellido NVARCHAR(100) NOT NULL,
+    FechaNacimiento DATE NOT NULL,
+    Genero CHAR(1),
+    Email NVARCHAR(100) UNIQUE NOT NULL,
+    Telefono NVARCHAR(20) NOT NULL,
+    SucursalID INT FOREIGN KEY REFERENCES Sucursales(SucursalID),
+    Cargo NVARCHAR(50) NOT NULL,
+    FechaContratacion DATE NOT NULL,
+    Salario DECIMAL(18,2) NOT NULL
+);
+
+-- Tabla CuentasEmpleados (para gestionar cuentas especiales para empleados)
+CREATE TABLE CuentasEmpleados (
+    CuentaEmpleadoID INT PRIMARY KEY IDENTITY(1,1),
+    EmpleadoID INT FOREIGN KEY REFERENCES Empleados(EmpleadoID),
+    NumeroCuenta NVARCHAR(20) UNIQUE NOT NULL,
+    TipoCuenta NVARCHAR(50) NOT NULL,
+    FechaApertura DATE NOT NULL,
+    Saldo DECIMAL(18,2) NOT NULL
+);
+
+-- Tabla Auditorias
+CREATE TABLE Auditorias (
+    AuditoriaID INT PRIMARY KEY IDENTITY(1,1),
+    EmpleadoID INT FOREIGN KEY REFERENCES Empleados(EmpleadoID),
+    FechaAuditoria DATETIME NOT NULL,
+    Descripcion NVARCHAR(255) NOT NULL,
+    Resultado NVARCHAR(50) NOT NULL
+);
+
+-- Tabla Seguros (relacionado con clientes)
+CREATE TABLE Seguros (
+    SeguroID INT PRIMARY KEY IDENTITY(1,1),
+    ClienteID INT FOREIGN KEY REFERENCES Clientes(ClienteID),
+    TipoSeguro NVARCHAR(50) NOT NULL, -- Vida, Hogar, Automóvil, etc.
+    FechaInicio DATE NOT NULL,
+    FechaFin DATE NOT NULL,
+    MontoAsegurado DECIMAL(18,2) NOT NULL,
+    Prima DECIMAL(18,2) NOT NULL
+);
+
+-- Tabla Reclamos (relacionado con seguros)
+CREATE TABLE Reclamos (
+    ReclamoID INT PRIMARY KEY IDENTITY(1,1),
+    SeguroID INT FOREIGN KEY REFERENCES Seguros(SeguroID),
+    FechaReclamo DATE NOT NULL,
+    MontoReclamado DECIMAL(18,2) NOT NULL,
+    EstadoReclamo NVARCHAR(50) NOT NULL, -- Pendiente, Aprobado, Rechazado
+    Descripcion NVARCHAR(255)
+);
