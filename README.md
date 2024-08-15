@@ -1,4 +1,3 @@
-Base de Datos Bancaria
 Este repositorio contiene una base de datos diseñada para simular las operaciones de un banco.
 La base de datos incluye una estructura normalizada con varias tablas que representan clientes, cuentas, transacciones, préstamos, pagos, tarjetas, sucursales y empleados.
 
