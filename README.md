@@ -1,7 +1,6 @@
 Este repositorio contiene una base de datos diseñada para simular las operaciones de un banco.
 La base de datos incluye una estructura normalizada con varias tablas que representan clientes, cuentas, transacciones, préstamos, pagos, tarjetas, sucursales y empleados.
 
-Estructura de la Base de Datos
 La base de datos está compuesta por las siguientes tablas:
 
 Clientes: Información personal de los clientes.
