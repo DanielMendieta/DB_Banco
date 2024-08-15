@@ -1,0 +1,155 @@
+USE BancoDB;
+GO
+
+-- Insertar registros en la tabla Clientes
+INSERT INTO Clientes (Nombre, Apellido, FechaNacimiento, Genero, Email, Telefono) VALUES
+('Juan', 'Pérez', '1980-05-12', 'M', 'juan.perez@example.com', '123-456-7890'),
+('Ana', 'García', '1985-07-23', 'F', 'ana.garcia@example.com', '098-765-4321'),
+('Carlos', 'Lopez', '1978-09-01', 'M', 'carlos.lopez@example.com', '555-123-4567'),
+('Lucía', 'Martínez', '1990-12-15', 'F', 'lucia.martinez@example.com', '456-789-0123'),
+('José', 'Rodríguez', '1982-04-20', 'M', 'jose.rodriguez@example.com', '789-012-3456'),
+('María', 'Fernández', '1987-06-18', 'F', 'maria.fernandez@example.com', '678-901-2345'),
+('Miguel', 'Gómez', '1975-08-09', 'M', 'miguel.gomez@example.com', '890-123-4567'),
+('Laura', 'Díaz', '1992-11-03', 'F', 'laura.diaz@example.com', '345-678-9012'),
+('Roberto', 'Sánchez', '1984-01-29', 'M', 'roberto.sanchez@example.com', '123-890-4567'),
+('Patricia', 'Romero', '1989-07-25', 'F', 'patricia.romero@example.com', '987-654-3210'),
+('Javier', 'Torres', '1979-10-17', 'M', 'javier.torres@example.com', '234-567-8901'),
+('Andrea', 'Ramírez', '1993-05-30', 'F', 'andrea.ramirez@example.com', '678-234-5678'),
+('Sergio', 'Flores', '1981-02-19', 'M', 'sergio.flores@example.com', '456-012-3456'),
+('Marta', 'Vega', '1988-09-07', 'F', 'marta.vega@example.com', '567-890-1234'),
+('Gonzalo', 'Méndez', '1977-03-14', 'M', 'gonzalo.mendez@example.com', '901-234-5678');
+GO
+
+-- Insertar registros en la tabla Cuentas
+INSERT INTO Cuentas (ClienteID, NumeroCuenta, TipoCuenta, FechaApertura, Saldo) VALUES
+(1, '100123456', 'Ahorro', '2022-01-10', 1500.75),
+(2, '100987654', 'Corriente', '2021-11-05', 3500.50),
+(3, '100112233', 'Ahorro', '2023-03-15', 1250.25),
+(4, '100445566', 'Corriente', '2020-09-22', 2300.00),
+(5, '100778899', 'Ahorro', '2022-05-18', 1900.50),
+(6, '100998877', 'Corriente', '2021-06-09', 4200.75),
+(7, '100667788', 'Ahorro', '2023-07-12', 1100.60),
+(8, '100334455', 'Corriente', '2020-12-01', 3100.40),
+(9, '100556677', 'Ahorro', '2021-03-21', 2900.90),
+(10, '100112244', 'Corriente', '2022-08-30', 3700.85),
+(11, '100556688', 'Ahorro', '2023-02-10', 2400.00),
+(12, '100778866', 'Corriente', '2021-04-25', 3200.35),
+(13, '100334477', 'Ahorro', '2022-11-15', 2700.25),
+(14, '100112255', 'Corriente', '2020-06-19', 4600.10),
+(15, '100667799', 'Ahorro', '2023-01-07', 1400.50);
+GO
+
+-- Insertar registros en la tabla Transacciones
+INSERT INTO Transacciones (CuentaID, FechaTransaccion, Monto, TipoTransaccion, Descripcion) VALUES
+(1, CONVERT(datetime, '2023-01-05 10:15:00', 120), 200.00, 'Deposito', 'Depósito en efectivo'),
+(2, CONVERT(datetime, '2023-02-10 14:30:00', 120), 500.50, 'Retiro', 'Retiro en cajero automático'),
+(3, CONVERT(datetime, '2023-03-15 09:00:00', 120), 300.75, 'Transferencia', 'Transferencia a otra cuenta'),
+(4, CONVERT(datetime, '2023-04-20 11:45:00', 120), 150.00, 'Deposito', 'Depósito en cheque'),
+(5, CONVERT(datetime, '2023-05-18 13:00:00', 120), 400.00, 'Retiro', 'Retiro en ventanilla'),
+(6, CONVERT(datetime, '2023-06-22 16:20:00', 120), 250.50, 'Transferencia', 'Pago de servicio'),
+(7, CONVERT(datetime, '2023-07-12 12:10:00', 120), 100.75, 'Deposito', 'Depósito en efectivo'),
+(8, CONVERT(datetime, '2023-08-09 15:30:00', 120), 600.00, 'Retiro', 'Retiro en cajero automático'),
+(9, CONVERT(datetime, '2023-09-05 08:45:00', 120), 350.25, 'Transferencia', 'Transferencia a otra cuenta'),
+(10, CONVERT(datetime, '2023-10-20 14:15:00', 120), 500.00, 'Deposito', 'Depósito en cheque'),
+(11, CONVERT(datetime, '2023-11-25 11:30:00', 120), 450.00, 'Retiro', 'Retiro en ventanilla'),
+(12, CONVERT(datetime, '2023-12-30 17:00:00', 120), 300.75, 'Transferencia', 'Pago de servicio'),
+(13, CONVERT(datetime, '2024-01-15 10:25:00', 120), 200.00, 'Deposito', 'Depósito en efectivo'),
+(14, CONVERT(datetime, '2024-02-18 13:35:00', 120), 700.50, 'Retiro', 'Retiro en cajero automático'),
+(15, CONVERT(datetime, '2024-03-20 09:15:00', 120), 450.75, 'Transferencia', 'Transferencia a otra cuenta');
+GO
+
+
+-- Insertar registros en la tabla Prestamos
+INSERT INTO Prestamos (ClienteID, MontoPrestamo, TasaInteres, FechaPrestamo, FechaVencimiento, Estado) VALUES
+(1, 10000.00, 5.5, '2022-01-15', '2027-01-15', 'Activo'),
+(2, 15000.00, 4.9, '2021-06-10', '2026-06-10', 'Activo'),
+(3, 20000.00, 6.2, '2020-09-25', '2025-09-25', 'Activo'),
+(4, 12000.00, 5.8, '2023-03-05', '2028-03-05', 'Activo'),
+(5, 25000.00, 4.7, '2021-11-20', '2026-11-20', 'Activo'),
+(6, 18000.00, 5.3, '2022-07-30', '2027-07-30', 'Activo'),
+(7, 22000.00, 6.0, '2020-12-15', '2025-12-15', 'Activo'),
+(8, 14000.00, 5.1, '2023-05-25', '2028-05-25', 'Activo'),
+(9, 16000.00, 4.8, '2021-08-10', '2026-08-10', 'Activo'),
+(10, 30000.00, 6.5, '2020-11-05', '2025-11-05', 'Activo'),
+(11, 17000.00, 5.4, '2022-02-20', '2027-02-20', 'Activo'),
+(12, 21000.00, 5.9, '2021-10-15', '2026-10-15', 'Activo'),
+(13, 24000.00, 6.3, '2020-05-30', '2025-05-30', 'Activo'),
+(14, 11000.00, 5.2, '2023-07-15', '2028-07-15', 'Activo'),
+(15, 26000.00, 4.6, '2021-04-25', '2026-04-25', 'Activo');
+GO
+
+-- Insertar registros en la tabla PagosPrestamo
+INSERT INTO PagosPrestamo (PrestamoID, FechaPago, MontoPagado) VALUES
+(1, '2023-01-05', 500.00),
+(2, '2023-02-10', 750.50),
+(3, '2023-03-15', 1000.75),
+(4, '2023-04-20', 600.00),
+(5, '2023-05-18', 800.00),
+(6, '2023-06-22', 550.50),
+(7, '2023-07-12', 900.75),
+(8, '2023-08-09', 700.00),
+(9, '2023-09-05', 650.25),
+(10, '2023-10-20', 950.00),
+(11, '2023-11-25', 850.00),
+(12, '2023-12-30', 750.75),
+(13, '2024-01-15', 500.00),
+(14, '2024-02-18', 1000.50),
+(15, '2024-03-20', 1200.75);
+GO
+
+-- Insertar registros en la tabla Tarjetas
+INSERT INTO Tarjetas (ClienteID, NumeroTarjeta, TipoTarjeta, FechaExpiracion, CodigoSeguridad) VALUES
+(1, '4111111111111111', 'Crédito', '2025-06-30', '123'),
+(2, '4222222222222222', 'Débito', '2024-11-30', '234'),
+(3, '4333333333333333', 'Crédito', '2026-04-30', '345'),
+(4, '4444444444444444', 'Débito', '2023-12-31', '456'),
+(5, '4555555555555555', 'Crédito', '2025-09-30', '567'),
+(6, '4666666666666666', 'Débito', '2024-03-31', '678'),
+(7, '4777777777777777', 'Crédito', '2026-07-31', '789'),
+(8, '4888888888888888', 'Débito', '2023-05-31', '890'),
+(9, '4999999999999999', 'Crédito', '2025-01-31', '901'),
+(10, '5000000000000000', 'Débito', '2024-10-31', '012'),
+(11, '5111111111111111', 'Crédito', '2026-02-28', '123'),
+(12, '5222222222222222', 'Débito', '2023-09-30', '234'),
+(13, '5333333333333333', 'Crédito', '2025-11-30', '345'),
+(14, '5444444444444444', 'Débito', '2024-08-31', '456'),
+(15, '5555555555555555', 'Crédito', '2026-05-31', '567');
+GO
+
+-- Insertar registros en la tabla Sucursales
+INSERT INTO Sucursales (NombreSucursal, Direccion, Ciudad, Provincia, CodigoPostal) VALUES
+('Sucursal Centro', 'Calle Principal 123', 'Ciudad A', 'Provincia X', '1000'),
+('Sucursal Norte', 'Av. Libertad 456', 'Ciudad B', 'Provincia Y', '2000'),
+('Sucursal Sur', 'Calle Independencia 789', 'Ciudad C', 'Provincia Z', '3000'),
+('Sucursal Este', 'Av. Paz 101', 'Ciudad D', 'Provincia X', '4000'),
+('Sucursal Oeste', 'Calle Esperanza 202', 'Ciudad E', 'Provincia Y', '5000'),
+('Sucursal Central', 'Av. Unión 303', 'Ciudad F', 'Provincia Z', '6000'),
+('Sucursal Nueva', 'Calle Progreso 404', 'Ciudad G', 'Provincia X', '7000'),
+('Sucursal Antiguo', 'Av. Historia 505', 'Ciudad H', 'Provincia Y', '8000'),
+('Sucursal Norte II', 'Calle Futuro 606', 'Ciudad I', 'Provincia Z', '9000'),
+('Sucursal Sur II', 'Av. Innovación 707', 'Ciudad J', 'Provincia X', '10000'),
+('Sucursal Este II', 'Calle Desarrollo 808', 'Ciudad K', 'Provincia Y', '11000'),
+('Sucursal Oeste II', 'Av. Crecimiento 909', 'Ciudad L', 'Provincia Z', '12000'),
+('Sucursal Central II', 'Calle Modernidad 1010', 'Ciudad M', 'Provincia X', '13000'),
+('Sucursal Nueva II', 'Av. Evolución 1111', 'Ciudad N', 'Provincia Y', '14000'),
+('Sucursal Antiguo II', 'Calle Progreso 1212', 'Ciudad O', 'Provincia Z', '15000');
+GO
+
+-- Insertar registros en la tabla Empleados
+INSERT INTO Empleados (Nombre, Apellido, FechaNacimiento, Genero, Email, Telefono, SucursalID, Cargo, FechaContratacion, Salario) VALUES
+('Pedro', 'Hernández', '1985-04-12', 'M', 'pedro.hernandez@example.com', '345-678-9012', 1, 'Gerente', '2015-06-01', 5500.00),
+('Luisa', 'Morales', '1990-07-23', 'F', 'luisa.morales@example.com', '678-901-2345', 2, 'Cajero', '2017-09-15', 3200.50),
+('Jorge', 'Vargas', '1983-09-01', 'M', 'jorge.vargas@example.com', '123-890-4567', 3, 'Asesor Financiero', '2016-11-10', 4500.75),
+('Elena', 'Ortega', '1989-12-15', 'F', 'elena.ortega@example.com', '789-012-3456', 4, 'Cajero', '2018-01-20', 3100.00),
+('Tomás', 'Navarro', '1982-04-20', 'M', 'tomas.navarro@example.com', '890-123-4567', 5, 'Gerente', '2014-03-25', 6000.00),
+('Clara', 'Paredes', '1987-06-18', 'F', 'clara.paredes@example.com', '234-567-8901', 6, 'Asesor Financiero', '2017-05-30', 4700.50),
+('Daniel', 'Ruiz', '1975-08-09', 'M', 'daniel.ruiz@example.com', '901-234-5678', 7, 'Cajero', '2016-07-05', 3000.75),
+('Raquel', 'Soto', '1992-11-03', 'F', 'raquel.soto@example.com', '567-890-1234', 8, 'Asesor Financiero', '2018-02-15', 4600.25),
+('Vicente', 'Rivas', '1984-01-29', 'M', 'vicente.rivas@example.com', '678-234-5678', 9, 'Gerente', '2014-10-10', 5900.00),
+('Camila', 'Núñez', '1989-07-25', 'F', 'camila.nunez@example.com', '456-012-3456', 10, 'Cajero', '2019-04-18', 3050.50),
+('Mauricio', 'Suárez', '1979-10-17', 'M', 'mauricio.suarez@example.com', '789-234-5678', 11, 'Asesor Financiero', '2015-08-01', 4800.75),
+('Florencia', 'Blanco', '1993-05-30', 'F', 'florencia.blanco@example.com', '234-678-9012', 12, 'Gerente', '2013-12-20', 6200.00),
+('Andrés', 'Muñoz', '1981-02-19', 'M', 'andres.munoz@example.com', '890-345-6789', 13, 'Cajero', '2017-03-15', 3150.50),
+('Paola', 'González', '1988-09-07', 'F', 'paola.gonzalez@example.com', '567-890-1234', 14, 'Asesor Financiero', '2019-07-22', 4700.25),
+('Rodrigo', 'Medina', '1977-03-14', 'M', 'rodrigo.medina@example.com', '678-234-5678', 15, 'Gerente', '2015-02-05', 6100.00);
+GO
