@@ -1,0 +1,47 @@
+1 - Consulta para agrupar las cuentas por cliente y muestre el saldo total de todas las cuentas de cada cliente.
+
+SELECT c.ClienteID, 
+c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+SUM(a.Saldo) AS SaldoTotal
+FROM Clientes c
+INNER JOIN Cuentas a ON c.ClienteID = a.ClienteID
+GROUP BY c.ClienteID, c.Nombre, c.Apellido
+ORDER BY SaldoTotal DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+2 - Consulta para listar transacciones de un cliente específico en el último mes.
+
+SELECT t.TransaccionID, 
+t.FechaTransaccion, 
+t.Monto, 
+t.TipoTransaccion, 
+t.Descripcion
+FROM Transacciones t
+INNER JOIN Cuentas a ON t.CuentaID = a.CuentaID
+WHERE a.ClienteID = 1
+AND t.FechaTransaccion >= DATEADD(MONTH, -1, GETDATE())
+ORDER BY t.FechaTransaccion DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+3 -  Consulta para obtener los empleados que trabajan en una sucursal específica.
+
+SELECT e.EmpleadoID, 
+e.Nombre + ' ' + e.Apellido AS NombreEmpleado, 
+e.Posicion AS Posicion, 
+s.Nombre AS NombreSucursal
+FROM Empleados e
+INNER JOIN Sucursales s ON e.SucursalID = s.SucursalID
+WHERE s.SucursalID = 2;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+4 - 
+
+
+
+
+
+
+
