@@ -37,11 +37,175 @@ WHERE s.SucursalID = 2;
 
 -------------------------------------------------------------------------------------------------------------------------
 
-4 - 
+4 - Obtener el cliente con el mayor monto total en préstamos activos.
 
+SELECT TOP 1 c.ClienteID, c.Nombre + ' ' + c.Apellido AS NombreCliente, SUM(p.MontoPrestamo) AS TotalPrestamos
+FROM Clientes c
+INNER JOIN Prestamos p ON c.ClienteID = p.ClienteID
+WHERE p.Estado = 'Activo'
+GROUP BY c.ClienteID, c.Nombre, c.Apellido
+ORDER BY TotalPrestamos DESC;
 
+-------------------------------------------------------------------------------------------------------------------------
 
+5 - Listar las cuentas que tienen más de un tipo de transacción en el mismo día.
 
+SELECT t.CuentaID, t.FechaTransaccion, COUNT(DISTINCT t.TipoTransaccion) AS TiposTransaccionDistintos
+FROM Transacciones t
+GROUP BY t.CuentaID, t.FechaTransaccion
+HAVING COUNT(DISTINCT t.TipoTransaccion) > 1
+ORDER BY t.FechaTransaccion DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+6 - Identificar clientes que han pagado sus préstamos en su totalidad y han realizado transacciones en los últimos 3 meses.
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    p.PrestamoID, 
+    SUM(pa.MontoPago) AS TotalPagado, 
+    MAX(t.FechaTransaccion) AS UltimaTransaccion
+FROM 
+    Clientes c
+INNER JOIN 
+    Prestamos p ON c.ClienteID = p.ClienteID
+INNER JOIN 
+    PagosPrestamo pa ON p.PrestamoID = pa.PrestamoID
+INNER JOIN 
+    Cuentas a ON c.ClienteID = a.ClienteID
+INNER JOIN 
+    Transacciones t ON a.CuentaID = t.CuentaID
+WHERE 
+    p.MontoPrestamo = (SELECT SUM(MontoPago) FROM PagosPrestamo WHERE PrestamoID = p.PrestamoID)
+    AND t.FechaTransaccion >= DATEADD(MONTH, -3, GETDATE())
+GROUP BY 
+    c.ClienteID, c.Nombre, c.Apellido, p.PrestamoID
+HAVING 
+    SUM(pa.MontoPago) >= p.MontoPrestamo
+ORDER BY 
+    UltimaTransaccion DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+7 - Identificar clientes que tienen tanto una cuenta de ahorro como una cuenta corriente y 
+que además han realizado un depósito en cada tipo de cuenta en el último mes. 
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente,
+    a1.CuentaID AS CuentaAhorroID, 
+    a2.CuentaID AS CuentaCorrienteID,
+    MAX(t1.FechaTransaccion) AS UltimoDepositoAhorro,
+    MAX(t2.FechaTransaccion) AS UltimoDepositoCorriente
+FROM 
+    Clientes c
+INNER JOIN 
+    Cuentas a1 ON c.ClienteID = a1.ClienteID AND a1.TipoCuenta = 'Ahorro'
+INNER JOIN 
+    Cuentas a2 ON c.ClienteID = a2.ClienteID AND a2.TipoCuenta = 'Corriente'
+INNER JOIN 
+    Transacciones t1 ON a1.CuentaID = t1.CuentaID AND t1.TipoTransaccion = 'Deposito'
+INNER JOIN 
+    Transacciones t2 ON a2.CuentaID = t2.CuentaID AND t2.TipoTransaccion = 'Deposito'
+WHERE 
+    t1.FechaTransaccion >= DATEADD(MONTH, -1, GETDATE())
+    AND t2.FechaTransaccion >= DATEADD(MONTH, -1, GETDATE())
+GROUP BY 
+    c.ClienteID, c.Nombre, c.Apellido, a1.CuentaID, a2.CuentaID
+ORDER BY 
+    UltimoDepositoAhorro DESC, UltimoDepositoCorriente DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+8 - Obtener clientes con más de una tarjeta de crédito y su último pago realizado en cada una.
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    t.TarjetaID, 
+    t.NumeroTarjeta, 
+    MAX(p.FechaPago) AS UltimoPago
+FROM 
+    Clientes c
+INNER JOIN 
+    Tarjetas t ON c.ClienteID = t.ClienteID AND t.TipoTarjeta = 'Crédito'
+INNER JOIN 
+    PagosTarjeta p ON t.TarjetaID = p.TarjetaID
+GROUP BY 
+    c.ClienteID, c.Nombre, c.Apellido, t.TarjetaID, t.NumeroTarjeta
+HAVING 
+    COUNT(t.TarjetaID) > 1
+ORDER BY 
+    UltimoPago DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+9 - Obtener el número de empleados, salario promedio, y el empleado con el salario más alto en sucursales con más de 5 empleados.
+
+WITH EmpleadosSucursales AS (
+    SELECT 
+        s.SucursalID, 
+        s.Nombre AS NombreSucursal, 
+        COUNT(e.EmpleadoID) AS NumeroEmpleados, 
+        AVG(e.Salario) AS SalarioPromedio,
+        MAX(e.Salario) AS SalarioMaximo
+    FROM 
+        Sucursales s
+    INNER JOIN 
+        Empleados e ON s.SucursalID = e.SucursalID
+    GROUP BY 
+        s.SucursalID, s.Nombre
+    HAVING 
+        COUNT(e.EmpleadoID) > 5
+)
+SELECT 
+    es.SucursalID, 
+    es.NombreSucursal, 
+    es.NumeroEmpleados, 
+    es.SalarioPromedio, 
+    e.Nombre + ' ' + e.Apellido AS EmpleadoConSalarioMaximo, 
+    es.SalarioMaximo
+FROM 
+    EmpleadosSucursales es
+INNER JOIN 
+    Empleados e ON es.SucursalID = e.SucursalID AND es.SalarioMaximo = e.Salario
+ORDER BY 
+    es.NumeroEmpleados DESC, es.SalarioPromedio DESC;
+
+-------------------------------------------------------------------------------------------------------------------------
+
+10 - Clientes que tienen préstamos activos y han realizado un pago en el último mes, 
+mostrando el monto total de préstamos y el último pago realizado.
+
+WITH PrestamosActivos AS (
+    SELECT 
+        p.ClienteID, 
+        p.PrestamoID, 
+        SUM(p.MontoPrestamo) AS MontoTotalPrestamos, 
+        MAX(pa.FechaPago) AS UltimoPago
+    FROM 
+        Prestamos p
+    INNER JOIN 
+        PagosPrestamo pa ON p.PrestamoID = pa.PrestamoID
+    WHERE 
+        p.Estado = 'Activo'
+    GROUP BY 
+        p.ClienteID, p.PrestamoID
+    HAVING 
+        MAX(pa.FechaPago) >= DATEADD(MONTH, -1, GETDATE())
+)
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    pa.MontoTotalPrestamos, 
+    pa.UltimoPago
+FROM 
+    PrestamosActivos pa
+INNER JOIN 
+    Clientes c ON pa.ClienteID = c.ClienteID
+ORDER BY 
+    pa.UltimoPago DESC, pa.MontoTotalPrestamos DESC;
 
 
 
