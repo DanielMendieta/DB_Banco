@@ -1,0 +1,60 @@
+1 - Consulta para obtener los clientes que tienen un saldo mayor al saldo promedio de todas las cuentas.
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    a.Saldo
+FROM 
+    Clientes c
+INNER JOIN 
+    Cuentas a ON c.ClienteID = a.ClienteID
+WHERE 
+    a.Saldo > (SELECT AVG(Saldo) FROM Cuentas)
+ORDER BY 
+    a.Saldo DESC;
+----------------------------------------------------------------------------------------------------------
+2 - Consulta para obtener los empleados que ganan más que el salario promedio de su sucursal.
+
+SELECT 
+    e.EmpleadoID, 
+    e.Nombre + ' ' + e.Apellido AS NombreEmpleado, 
+    e.Salario, 
+    s.Nombre AS NombreSucursal
+FROM 
+    Empleados e
+INNER JOIN 
+    Sucursales s ON e.SucursalID = s.SucursalID
+WHERE 
+    e.Salario > (SELECT AVG(Salario) 
+                 FROM Empleados 
+                 WHERE SucursalID = e.SucursalID)
+ORDER BY 
+    e.Salario DESC;
+----------------------------------------------------------------------------------------------------------
+3 - Listar las cuentas con saldo mayor que el saldo promedio de las cuentas del mismo tipo.
+
+SELECT 
+    a.CuentaID, 
+    a.TipoCuenta, 
+    a.Saldo, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente
+FROM 
+    Cuentas a
+INNER JOIN 
+    Clientes c ON a.ClienteID = c.ClienteID
+WHERE 
+    a.Saldo > (SELECT AVG(Saldo) 
+               FROM Cuentas 
+               WHERE TipoCuenta = a.TipoCuenta)
+ORDER BY 
+    a.Saldo DESC;
+
+
+
+
+
+
+
+
+
+
