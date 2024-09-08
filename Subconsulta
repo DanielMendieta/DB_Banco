@@ -48,6 +48,98 @@ WHERE
                WHERE TipoCuenta = a.TipoCuenta)
 ORDER BY 
     a.Saldo DESC;
+----------------------------------------------------------------------------------------------------------
+4 - Clientes que tienen un préstamo con un monto superior al promedio de todos los préstamos y 
+además han realizado al menos un pago en los últimos 30 días.
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    p.MontoPrestamo, 
+    MAX(pa.FechaPago) AS UltimoPago
+FROM 
+    Clientes c
+INNER JOIN 
+    Prestamos p ON c.ClienteID = p.ClienteID
+INNER JOIN 
+    PagosPrestamo pa ON p.PrestamoID = pa.PrestamoID
+WHERE 
+    p.MontoPrestamo > (SELECT AVG(MontoPrestamo) FROM Prestamos)
+    AND pa.FechaPago >= DATEADD(DAY, -30, GETDATE())
+GROUP BY 
+    c.ClienteID, c.Nombre, c.Apellido, p.MontoPrestamo
+ORDER BY 
+    p.MontoPrestamo DESC;
+
+----------------------------------------------------------------------------------------------------------
+
+5 - Cuentas cuyo saldo es mayor que el saldo promedio de todas las cuentas y la fecha de creación más reciente.
+
+SELECT 
+    a.CuentaID, 
+    a.Saldo, 
+    a.FechaCreacion
+FROM 
+    Cuentas a
+WHERE 
+    a.Saldo > (SELECT AVG(Saldo) FROM Cuentas)
+ORDER BY 
+    a.FechaCreacion DESC;
+
+----------------------------------------------------------------------------------------------------------
+
+6 - Obtener los empleados que tienen un salario mayor al promedio de todos los empleados de la misma sucursal, 
+junto con la fecha de contratación más reciente de cada empleado.
+
+SELECT 
+    e.EmpleadoID, 
+    e.Nombre + ' ' + e.Apellido AS NombreEmpleado, 
+    e.Salario, 
+    e.FechaContratacion, 
+    s.Nombre AS NombreSucursal
+FROM 
+    Empleados e
+INNER JOIN 
+    Sucursales s ON e.SucursalID = s.SucursalID
+WHERE 
+    e.Salario > (SELECT AVG(Salario) 
+                 FROM Empleados 
+                 WHERE SucursalID = e.SucursalID)
+ORDER BY 
+    e.FechaContratacion DESC;
+
+----------------------------------------------------------------------------------------------------------
+
+7 - Clientes que tienen más de una cuenta y cuyo saldo total en todas sus cuentas es mayor al saldo promedio de todos los clientes.
+
+SELECT 
+    c.ClienteID, 
+    c.Nombre + ' ' + c.Apellido AS NombreCliente, 
+    COUNT(a.CuentaID) AS NumeroCuentas, 
+    SUM(a.Saldo) AS SaldoTotal
+FROM 
+    Clientes c
+INNER JOIN 
+    Cuentas a ON c.ClienteID = a.ClienteID
+GROUP BY 
+    c.ClienteID, c.Nombre, c.Apellido
+HAVING 
+    COUNT(a.CuentaID) > 1
+    AND SUM(a.Saldo) > (SELECT AVG(SaldoTotal) 
+                         FROM (SELECT SUM(Saldo) AS SaldoTotal 
+                               FROM Cuentas 
+                               GROUP BY ClienteID) AS Subquery)
+ORDER BY 
+    SaldoTotal DESC;
+
+
+
+
+
+
+
+
+
 
 
 
