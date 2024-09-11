@@ -132,8 +132,24 @@ HAVING
 ORDER BY 
     SaldoTotal DESC;
 
+----------------------------------------------------------------------------------------------------------
 
+8 - Sucursales que tienen más empleados que el promedio de empleados por sucursal.
 
+SELECT 
+    e.SucursalID AS Sucursal,
+    COUNT(e.EmpleadoID) AS NumeroEmpleados
+FROM 
+    Empleados e
+GROUP BY 
+    e.SucursalID
+HAVING 
+    COUNT(e.EmpleadoID) > (SELECT AVG(NumeroEmpleados) 
+                           FROM (SELECT COUNT(EmpleadoID) AS NumeroEmpleados 
+                                 FROM Empleados 
+                                 GROUP BY SucursalID) AS Subquery)
+ORDER BY 
+    NumeroEmpleados DESC;
 
 
 
