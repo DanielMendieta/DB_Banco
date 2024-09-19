@@ -1,0 +1,72 @@
+1 - Función recibe como parámetro el ID de un cliente y devuelve el saldo total de todas sus cuentas.
+
+CREATE FUNCTION fn_CalcularSaldoTotalCliente (@ClienteID INT)
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @SaldoTotal DECIMAL(18, 2);
+
+    SELECT @SaldoTotal = SUM(Saldo)
+    FROM Cuentas
+    WHERE ClienteID = @ClienteID;
+
+    RETURN ISNULL(@SaldoTotal, 0);
+END;
+--SELECT dbo.fn_CalcularSaldoTotalCliente(1) AS SaldoTotal;
+
+-----------------------------------------------------------------------------------------------------------
+
+2 - Número total de préstamos que ha solicitado un cliente, dado su ID.
+
+CREATE FUNCTION fn_ContarPrestamosCliente (@ClienteID INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @TotalPrestamos INT;
+
+    SELECT @TotalPrestamos = COUNT(PrestamoID)
+    FROM Prestamos
+    WHERE ClienteID = @ClienteID;
+
+    RETURN ISNULL(@TotalPrestamos, 0);
+END;
+
+--SELECT dbo.fn_ContarPrestamosCliente(1) AS TotalPrestamos;
+
+-----------------------------------------------------------------------------------------------------------
+
+3 - Calcula el saldo promedio de las cuentas de un cliente, dado su ID, 
+pero solo considera aquellas cuentas que tienen un saldo superior a un monto mínimo especificado como parámetro.
+
+CREATE FUNCTION fn_CalcularSaldoPromedioCliente (@ClienteID INT, @SaldoMinimo DECIMAL(18, 2))
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @SaldoPromedio DECIMAL(18, 2);
+
+    SELECT @SaldoPromedio = AVG(Saldo)
+    FROM Cuentas
+    WHERE ClienteID = @ClienteID
+    AND Saldo > @SaldoMinimo;
+
+    RETURN ISNULL(@SaldoPromedio, 0);
+END;
+
+-- SELECT dbo.fn_CalcularSaldoPromedioCliente(1, 1000) AS SaldoPromedio;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
