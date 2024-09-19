@@ -151,11 +151,48 @@ HAVING
 ORDER BY 
     NumeroEmpleados DESC;
 
+----------------------------------------------------------------------------------------------------------
 
+9 - Muestre el nombre completo de los clientes y el saldo de sus cuentas, 
+pero solo para aquellas cuentas cuyo saldo sea mayor que el promedio de saldo de todas las cuentas que tiene el mismo cliente. 
+Ordena los resultados por saldo de cuenta en orden descendente.
 
+SELECT 
+    Clientes.Nombre + ' ' + Clientes.Apellido AS NombreCompleto,
+    Cuentas.Saldo AS SaldoCuenta
+FROM 
+    Clientes
+JOIN 
+    Cuentas ON Clientes.ClienteID = Cuentas.ClienteID
+WHERE 
+    Cuentas.Saldo > (SELECT AVG(Saldo) 
+                     FROM Cuentas 
+                     WHERE ClienteID = Clientes.ClienteID)
+ORDER BY 
+    SaldoCuenta DESC;
 
+----------------------------------------------------------------------------------------------------------
+10 - Nombre completo de los empleados, su salario y el nombre del departamento al que pertenecen, 
+pero solo para aquellos empleados cuyo salario sea mayor que el salario promedio de todos los empleados que trabajan en el mismo departamento. 
+Además, muestra solo a aquellos empleados que llevan más de 5 años trabajando en la empresa. 
+Ordena los resultados por el salario en orden descendente.
 
-
+SELECT 
+    e.Nombre + ' ' + e.Apellido AS NombreCompleto,
+    e.Salario AS Salario,
+    d.Nombre AS Departamento
+FROM 
+    Empleados e
+JOIN 
+    Departamentos d ON e.DepartamentoID = d.DepartamentoID
+WHERE 
+    e.Salario > (SELECT AVG(Salario) 
+                 FROM Empleados 
+                 WHERE DepartamentoID = e.DepartamentoID)
+AND 
+    DATEDIFF(YEAR, e.FechaContratacion, GETDATE()) > 5
+ORDER BY 
+    e.Salario DESC;
 
 
 
