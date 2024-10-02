@@ -54,19 +54,165 @@ END;
 
 -- SELECT dbo.fn_CalcularSaldoPromedioCliente(1, 1000) AS SaldoPromedio;
 
+-----------------------------------------------------------------------------------------------------------
 
+4 - Deuda total pendiente de un cliente, considerando solo los préstamos que aún no han sido pagados en su totalidad.
 
+CREATE FUNCTION fn_CalcularDeudaPendiente (@ClienteID INT, @Estado VARCHAR(20))
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @DeudaTotal DECIMAL(18, 2);
 
+    SELECT @DeudaTotal = SUM(p.MontoPrestamo - ISNULL(p.MontoPagado, 0))
+    FROM Prestamos p
+    WHERE p.ClienteID = @ClienteID
+    AND p.Estado = @Estado
+    AND p.MontoPrestamo > ISNULL(p.MontoPagado, 0);
 
+    RETURN ISNULL(@DeudaTotal, 0);
+END;
 
+-- SELECT dbo.fn_CalcularDeudaPendiente(1, 'Pendiente') AS DeudaPendiente;
 
+-----------------------------------------------------------------------------------------------------------
 
+5 - Monto total de las transacciones de un cliente en un período específico.
 
+CREATE FUNCTION fn_CalcularTotalTransacciones (@ClienteID INT, @FechaInicio DATE, @FechaFin DATE)
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @TotalTransacciones DECIMAL(18, 2);
 
+    SELECT @TotalTransacciones = SUM(t.MontoTransaccion)
+    FROM Transacciones t
+    JOIN Cuentas c ON t.CuentaID = c.CuentaID
+    WHERE c.ClienteID = @ClienteID
+    AND t.FechaTransaccion BETWEEN @FechaInicio AND @FechaFin;
 
+    RETURN ISNULL(@TotalTransacciones, 0);
+END;
 
+-- SELECT dbo.fn_CalcularTotalTransacciones(1, '2023-01-01', '2023-12-31') AS TotalTransacciones;
 
+-----------------------------------------------------------------------------------------------------------
 
+6 -  Calcula el número total de cuentas activas que tiene un cliente. Las cuentas se consideran "activas" si su estado es 'Activo'.
 
+CREATE FUNCTION fn_ContarCuentasActivas (@ClienteID INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @TotalCuentasActivas INT;
+
+    SELECT @TotalCuentasActivas = COUNT(CuentaID)
+    FROM Cuentas
+    WHERE ClienteID = @ClienteID
+    AND Estado = 'Activo';
+
+    RETURN ISNULL(@TotalCuentasActivas, 0);
+END;
+
+-- SELECT dbo.fn_ContarCuentasActivas(5) AS TotalCuentasActivas;
+
+-----------------------------------------------------------------------------------------------------------
+
+7 - Monto total de intereses generados por los préstamos de un cliente.
+
+CREATE FUNCTION fn_CalcularInteresesTotales (@ClienteID INT)
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @TotalIntereses DECIMAL(18, 2);
+
+    SELECT @TotalIntereses = SUM(p.MontoPrestamo * p.TasaInteres / 100)
+    FROM Prestamos p
+    WHERE p.ClienteID = @ClienteID;
+
+    RETURN ISNULL(@TotalIntereses, 0);
+END;
+
+-- SELECT dbo.fn_CalcularInteresesTotales(1) AS InteresesTotales;
+
+-----------------------------------------------------------------------------------------------------------
+
+8 - Calcula el monto total de pagos realizados por un cliente en sus préstamos.
+
+CREATE FUNCTION fn_CalcularTotalPagos (@ClienteID INT)
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @TotalPagos DECIMAL(18, 2);
+
+    SELECT @TotalPagos = SUM(t.MontoTransaccion)
+    FROM Transacciones t
+    JOIN Prestamos p ON t.PrestamoID = p.PrestamoID
+    WHERE p.ClienteID = @ClienteID;
+
+    RETURN ISNULL(@TotalPagos, 0);
+END;
+
+-- calcula el monto total de pagos realizados por un cliente en sus préstamos.
+
+-----------------------------------------------------------------------------------------------------------
+
+9 - Calcula el saldo actual de un cliente considerando tanto sus préstamos como sus cuentas.
+
+CREATE FUNCTION fn_CalcularSaldoActual (@ClienteID INT)
+RETURNS DECIMAL(18, 2)
+AS
+BEGIN
+    DECLARE @TotalCuentas DECIMAL(18, 2);
+    DECLARE @TotalPrestamos DECIMAL(18, 2);
+    DECLARE @SaldoActual DECIMAL(18, 2);
+
+    -- Calcular el total de saldos en cuentas
+    SELECT @TotalCuentas = SUM(saldo)
+    FROM Cuentas
+    WHERE ClienteID = @ClienteID;
+
+    -- Calcular el total de montos de préstamos pendientes
+    SELECT @TotalPrestamos = SUM(MontoPrestamo)
+    FROM Prestamos
+    WHERE ClienteID = @ClienteID;
+
+    -- Calcular el saldo actual
+    SET @SaldoActual = ISNULL(@TotalCuentas, 0) - ISNULL(@TotalPrestamos, 0);
+
+    RETURN @SaldoActual;
+END;
+
+-- SELECT dbo.fn_CalcularSaldoActual(1) AS SaldoActual;
+
+-----------------------------------------------------------------------------------------------------------
+
+10 - Calcula el número total de transacciones realizadas por un cliente, y también el monto total de esas transacciones.
+
+CREATE FUNCTION fn_ResumenTransaccionesCliente (@ClienteID INT)
+RETURNS @Resumen TABLE (
+    TotalTransacciones INT,
+    MontoTotal DECIMAL(18, 2)
+)
+AS
+BEGIN
+    DECLARE @TotalTransacciones INT;
+    DECLARE @MontoTotal DECIMAL(18, 2);
+
+    -- Contar el total de transacciones del cliente
+    SELECT @TotalTransacciones = COUNT(t.TransaccionID),
+           @MontoTotal = SUM(t.MontoTransaccion)
+    FROM Transacciones t
+    JOIN Prestamos p ON t.PrestamoID = p.PrestamoID
+    WHERE p.ClienteID = @ClienteID;
+
+    -- Insertar resultados en la tabla de retorno
+    INSERT INTO @Resumen (TotalTransacciones, MontoTotal)
+    VALUES (@TotalTransacciones, ISNULL(@MontoTotal, 0));
+
+    RETURN;
+END;
+
+-- SELECT * FROM dbo.fn_ResumenTransaccionesCliente(1);
 
 
