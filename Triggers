@@ -1,0 +1,16 @@
+1 - Después de insertar un nuevo cliente en la tabla Clientes este trigger insertará un registro en una tabla de auditoría 
+llamada AuditoriaClientes para registrar la creación del nuevo cliente, incluyendo el ID del cliente, la fecha de creación y el nombre del cliente.
+
+CREATE TRIGGER trg_AuditarClientes
+ON Clientes
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO AuditoriaClientes (ClienteID, FechaCreacion, NombreCompleto)
+    SELECT ClienteID, GETDATE(), Nombre + ' ' + Apellido
+    FROM inserted;
+END;
+
+-- INSERT INTO Clientes (Nombre, Apellido, ...) VALUES ('Juan', 'Pérez', ...);
+
+----------------------------------------------------------------------------------------------------------------------------
