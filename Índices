@@ -1,0 +1,48 @@
+1 - Indice en la columna ClienteID de la tabla Cuentas para mejorar el rendimiento de las consultas que busquen cuentas por cliente.
+
+--(Índice No Clusterizado)
+CREATE INDEX idx_ClienteID ON Cuentas (ClienteID);
+
+Consulta que usa el índice:
+
+SELECT 
+    c.NumeroCuenta, 
+    c.Saldo, 
+    cl.Nombre, 
+    cl.Apellido
+FROM 
+    Cuentas c
+JOIN 
+    Clientes cl ON c.ClienteID = cl.ClienteID
+WHERE 
+    c.ClienteID = 1234;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+2 - Indice paraoptimizar el rendimiento de esta consulta que busca todas las transacciones de una cuenta específica y las ordena por la fecha de transacción.
+
+--(Índice No Clusterizado)
+
+CREATE INDEX idx_CuentaID_FechaTransaccion 
+ON Transacciones (CuentaID, FechaTransaccion);
+
+Consulta que usa el índice:
+
+SELECT 
+    t.TransaccionID, 
+    t.Monto, 
+    t.FechaTransaccion, 
+    t.Descripcion
+FROM 
+    Transacciones t
+WHERE 
+    t.CuentaID = 5678
+ORDER BY 
+    t.FechaTransaccion DESC;
+
+
+
+
+
+
+
