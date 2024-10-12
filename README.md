@@ -4,12 +4,19 @@ La base de datos incluye una estructura normalizada con varias tablas que repres
 La base de datos está compuesta por las siguientes tablas:
 
 Clientes: Información personal de los clientes.
+
 Cuentas: Detalles de las cuentas bancarias de los clientes.
+
 Transacciones: Registro de todas las transacciones realizadas.
+
 Préstamos: Detalles de los préstamos otorgados a los clientes.
+
 Pagos de Préstamos: Historial de pagos realizados por los clientes en sus préstamos.
+
 Tarjetas: Información de las tarjetas de crédito y débito de los clientes.
+
 Sucursales: Información de las sucursales del banco.
+
 Empleados: Datos del personal del banco.
 
 Contenido Futuro
