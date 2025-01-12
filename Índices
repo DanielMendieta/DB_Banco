@@ -3,7 +3,7 @@
 --(Índice No Clusterizado)
 CREATE INDEX idx_ClienteID ON Cuentas (ClienteID);
 
-Consulta que usa el índice:
+--Consulta que usa el índice:
 
 SELECT 
     c.NumeroCuenta, 
@@ -19,14 +19,14 @@ WHERE
 
 -----------------------------------------------------------------------------------------------------------------------------
 
-2 - Indice paraoptimizar el rendimiento de esta consulta que busca todas las transacciones de una cuenta específica y las ordena por la fecha de transacción.
+2 - Indice para optimizar el rendimiento de esta consulta que busca todas las transacciones de una cuenta específica y las ordena por la fecha de transacción.
 
 --(Índice No Clusterizado)
 
 CREATE INDEX idx_CuentaID_FechaTransaccion 
 ON Transacciones (CuentaID, FechaTransaccion);
 
-Consulta que usa el índice:
+--Consulta que usa el índice:
 
 SELECT 
     t.TransaccionID, 
@@ -40,8 +40,194 @@ WHERE
 ORDER BY 
     t.FechaTransaccion DESC;
 
+-----------------------------------------------------------------------------------------------------------------------------
 
+3 - Este índice permitirá a SQL Server encontrar las filas necesarias y ordenarlas más rápidamente.
 
+--(Índice No Clusterizado)
+
+CREATE INDEX idx_FechaTransaccion 
+ON Transacciones (FechaTransaccion);
+
+--Consulta que usa el índice:
+
+SELECT CuentaID, Monto, FechaTransaccion, Descripcion
+FROM Transacciones
+WHERE FechaTransaccion BETWEEN '2025-01-01' AND '2025-01-12'
+ORDER BY FechaTransaccion DESC;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+4 - Este índice clusterizado en ClienteID optimiza las consultas que filtran o agrupan préstamos por cliente, 
+mejorando la búsqueda y el rendimiento general.
+
+--Indice clusterizado
+
+CREATE CLUSTERED INDEX idx_ClienteID_Clustered
+ON Prestamos (ClienteID);
+
+--Consulta que usa el índice:
+
+SELECT 
+    ClienteID, 
+    SUM(MontoPrestamo) AS TotalPrestamos
+FROM 
+    Prestamos
+GROUP BY 
+    ClienteID
+ORDER BY 
+    ClienteID;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+5 - Este índice no clusterizado en SucursalID mejora el rendimiento de las consultas que agrupan y filtran préstamos por sucursal, 
+acelerando el acceso a los datos relacionados.
+
+CREATE NONCLUSTERED INDEX idx_SucursalID_NonClustered
+ON Prestamos (SucursalID);
+
+--Consulta que usa el índice:
+
+SELECT 
+    SucursalID, 
+    COUNT(*) AS TotalPrestamos
+FROM 
+    Prestamos
+GROUP BY 
+    SucursalID
+HAVING 
+    COUNT(*) > 10;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+6 - El índice clusterizado en ClienteID mejora el rendimiento al unir las tablas Clientes y Prestamos, 
+y acelera las consultas que filtran y agrupan datos por cliente.
+
+CREATE CLUSTERED INDEX idx_ClienteID_Clustered
+ON Prestamos (ClienteID);
+
+--Consulta que usa el índice:
+
+SELECT 
+    Clientes.ClienteID, 
+    Clientes.Nombre + ' ' + Clientes.Apellido AS NombreCompleto, 
+    SUM(Prestamos.MontoPrestamo) AS TotalPrestamos
+FROM 
+    Clientes
+JOIN 
+    Prestamos ON Clientes.ClienteID = Prestamos.ClienteID
+WHERE 
+    Prestamos.MontoPrestamo > 10000
+GROUP BY 
+    Clientes.ClienteID, Clientes.Nombre, Clientes.Apellido
+HAVING 
+    SUM(Prestamos.MontoPrestamo) > 50000
+ORDER BY 
+    TotalPrestamos DESC;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+7 - El índice idx_FechaPrestamo_NonClustered mejora el rendimiento al buscar registros recientes en la columna FechaPrestamo, 
+especialmente cuando se filtran datos por rango de fechas, como en la cláusula WHERE Prestamos.FechaPrestamo >= '2024-01-01'.
+
+CREATE NONCLUSTERED INDEX idx_FechaPrestamo_NonClustered
+ON Prestamos (FechaPrestamo);
+
+--Consulta que usa el índice:
+
+SELECT TOP 5 
+    Clientes.Nombre + ' ' + Clientes.Apellido AS NombreCompleto,
+    SUM(Prestamos.MontoPrestamo) AS TotalPrestamos,
+    MAX(Prestamos.FechaPrestamo) AS UltimoPrestamo
+FROM 
+    Clientes
+JOIN 
+    Prestamos ON Clientes.ClienteID = Prestamos.ClienteID
+WHERE 
+    Prestamos.FechaPrestamo >= '2024-01-01'
+GROUP BY 
+    Clientes.Nombre, Clientes.Apellido
+ORDER BY 
+    TotalPrestamos DESC;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+8 - El índice idx_CuentaID_NonClustered mejora el rendimiento de la consulta al acelerar la búsqueda de cuentas asociadas con préstamos, 
+especialmente cuando se realiza un LEFT JOIN con la tabla Prestamos utilizando la columna CuentaID. 
+Esto es útil cuando se busca obtener cuentas con más de tres préstamos.
+
+CREATE NONCLUSTERED INDEX idx_CuentaID_NonClustered
+ON Cuentas (CuentaID);
+
+--Consulta que usa el índice:
+
+SELECT 
+    Cuentas.NumeroCuenta, 
+    Clientes.Nombre + ' ' + Clientes.Apellido AS NombreCliente,
+    COUNT(Prestamos.PrestamoID) AS NumeroDePrestamos
+FROM 
+    Cuentas
+JOIN 
+    Clientes ON Cuentas.ClienteID = Clientes.ClienteID
+LEFT JOIN 
+    Prestamos ON Cuentas.CuentaID = Prestamos.CuentaID
+GROUP BY 
+    Cuentas.NumeroCuenta, Clientes.Nombre, Clientes.Apellido
+HAVING 
+    COUNT(Prestamos.PrestamoID) > 3
+ORDER BY 
+    NumeroDePrestamos DESC;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+9 - Este índice idx_FechaRegistro_NonClustered mejora la consulta al optimizar el filtrado de clientes que se registraron 
+dentro de un rango de fechas específico.
+
+CREATE NONCLUSTERED INDEX idx_FechaRegistro_NonClustered
+ON Clientes (FechaRegistro);
+
+--Consulta que usa el índice:
+
+SELECT 
+    Clientes.Nombre + ' ' + Clientes.Apellido AS NombreCliente,
+    SUM(Prestamos.MontoPrestamo) AS TotalPrestado
+FROM 
+    Clientes
+JOIN 
+    Prestamos ON Clientes.ClienteID = Prestamos.ClienteID
+WHERE 
+    Clientes.FechaRegistro BETWEEN '2020-01-01' AND '2021-12-31'
+GROUP BY 
+    Clientes.Nombre, Clientes.Apellido
+HAVING 
+    SUM(Prestamos.MontoPrestamo) > 50000
+ORDER BY 
+    TotalPrestado DESC;
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+10 - El índice idx_FechaPrestamo_Clustered mejora el rendimiento de esta consulta al ordenar la tabla Prestamos físicamente 
+según la fecha de préstamo. Esto permite realizar búsquedas más rápidas sobre el rango de fechas y 
+acelera la recuperación de registros ordenados por FechaPrestamo,
+
+CREATE CLUSTERED INDEX idx_FechaPrestamo_Clustered
+ON Prestamos (FechaPrestamo);
+
+--Consulta que usa el índice:
+
+SELECT 
+    Prestamos.PrestamoID,
+    Clientes.Nombre + ' ' + Clientes.Apellido AS ClienteNombre,
+    Prestamos.MontoPrestamo,
+    Prestamos.FechaPrestamo
+FROM 
+    Prestamos
+JOIN 
+    Clientes ON Prestamos.ClienteID = Clientes.ClienteID
+WHERE 
+    Prestamos.FechaPrestamo > '2023-01-01'
+ORDER BY 
+    Prestamos.FechaPrestamo DESC;
 
 
 
