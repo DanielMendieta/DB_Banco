@@ -1,5 +1,6 @@
 1 - Objetivo de este análisis: Identificar consultas costosas en términos de tiempo de CPU y memoria con sys.dm_exec_query_stats.
 
+
 SELECT 
     TOP 5 
     qs.execution_count AS VecesEjecutada,
