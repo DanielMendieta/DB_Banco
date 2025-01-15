@@ -44,6 +44,8 @@ CREATE NONCLUSTERED INDEX idx_FechaVencimiento
 ON Prestamos (FechaVencimiento)
 INCLUDE (PrestamoID, ClienteID);
 
+
+Resultado:
 Con ello logramos reducir el tiempo de búsqueda al evitar el escaneo completo de la tabla.
 
 
