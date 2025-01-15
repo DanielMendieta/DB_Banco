@@ -1,0 +1,60 @@
+1 - Objetivo de este análisis: Identificar consultas costosas en términos de tiempo de CPU y memoria con sys.dm_exec_query_stats.
+
+SELECT 
+    TOP 5 
+    qs.execution_count AS VecesEjecutada,
+    qs.total_worker_time / qs.execution_count AS CPU_Promedio,
+    qs.total_worker_time AS CPU_Total,
+    qs.total_elapsed_time / qs.execution_count AS Tiempo_Promedio,
+    qs.total_elapsed_time AS Tiempo_Total,
+    SUBSTRING(qt.text, qs.statement_start_offset / 2 + 1, 
+              (qs.statement_end_offset - qs.statement_start_offset) / 2 + 1) AS Consulta
+FROM 
+    sys.dm_exec_query_stats AS qs
+CROSS APPLY 
+    sys.dm_exec_sql_text(qs.sql_handle) AS qt
+ORDER BY 
+    qs.total_worker_time DESC;
+-----------------------------------------------------------------------------------------------------------------------------------
+¿Que se obtenemos?.
+
+1-Una de las consultas mas costosas, debido a que la columna FechaVencimiento no tiene índice:
+
+SELECT 
+    p.ClienteID, 
+    c.Nombre, 
+    c.Apellido, 
+    COUNT(p.PrestamoID) AS TotalPrestamos
+FROM 
+    Prestamos p
+JOIN 
+    Clientes c ON p.ClienteID = c.ClienteID
+WHERE 
+    p.FechaVencimiento > '2024-01-01'
+GROUP BY 
+    p.ClienteID, c.Nombre, c.Apellido
+ORDER BY 
+    TotalPrestamos DESC;
+
+Posible Solucion:
+Creacion de un índice no clusterizado para las consultas que filtran por FechaVencimiento.
+
+CREATE NONCLUSTERED INDEX idx_FechaVencimiento
+ON Prestamos (FechaVencimiento)
+INCLUDE (PrestamoID, ClienteID);
+
+Con ello logramos reducir el tiempo de búsqueda al evitar el escaneo completo de la tabla.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
