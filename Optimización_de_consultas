@@ -17,7 +17,7 @@ CROSS APPLY
 ORDER BY 
     qs.total_worker_time DESC;
 -----------------------------------------------------------------------------------------------------------------------------------
-¿Que se obtenemos?.
+¿Que obtenemos?.
 
 1-Una de las consultas mas costosas, debido a que la columna FechaVencimiento no tiene índice:
 
@@ -46,7 +46,23 @@ INCLUDE (PrestamoID, ClienteID);
 
 
 Resultado:
-Con ello logramos reducir el tiempo de búsqueda al evitar el escaneo completo de la tabla.
+Con ello logramos reducir el tiempo de búsqueda al evitar el escaneo completo de la tabla, para asegurarnos de ello podemos
+Medir el Impacto mediante.
+
+SELECT 
+    qs.execution_count AS VecesEjecutada,
+    qs.total_worker_time / qs.execution_count AS CPU_Promedio,
+    qs.total_elapsed_time / qs.execution_count AS Tiempo_Promedio,
+    qs.total_physical_reads AS LecturasFisicas,
+    qs.total_logical_reads AS LecturasLogicas
+FROM 
+    sys.dm_exec_query_stats AS qs
+CROSS APPLY 
+    sys.dm_exec_sql_text(qs.sql_handle) AS st
+WHERE 
+    st.text LIKE '%Prestamos%FechaVencimiento%';
+
+
 
 
 
