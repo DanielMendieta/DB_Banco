@@ -1,0 +1,50 @@
+-- Consultar las estadísticas de una tabla específica (por ejemplo, 'Cuentas')
+
+SELECT 
+    s.name AS Nombre_Estadistica,
+    c.name AS Columna,
+    p.rows AS Filas,
+    s.auto_created AS Creada_Automaticamente,
+    s.last_updated AS Ultima_Actualizacion
+FROM 
+    sys.stats s
+INNER JOIN 
+    sys.stats_columns sc ON s.stats_id = sc.stats_id AND s.object_id = sc.object_id
+INNER JOIN 
+    sys.columns c ON c.object_id = s.object_id AND c.column_id = sc.column_id
+INNER JOIN 
+    sys.partitions p ON p.object_id = s.object_id
+WHERE 
+    s.object_id = OBJECT_ID('Cuentas');
+
+
+Uso:
+Identificar estadísticas obsoletas o columnas sin estadísticas útiles.
+Diagnosticar rendimiento antes de decidir actualizar las estadísticas.
+
+
+--Este script puede adaptarse a cualquier tabla cambiando 'Cuentas' por el nombre deseado.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+--Actualizar estadísticas manualmente
+
+-- Actualizar las estadísticas de todas las tablas en la base de datos
+EXEC sp_updatestats;
+
+-- Actualizar las estadísticas de una tabla específica (por ejemplo, 'Cuentas')
+UPDATE STATISTICS Cuentas;
+
+-- Actualizar las estadísticas de una tabla y columna específica
+UPDATE STATISTICS Cuentas (Nombre_Estadistica);
+
+
+
+
+
+
+
+
+
+
+
