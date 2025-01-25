@@ -1,0 +1,93 @@
+1-Crear la Función de Partición
+
+CREATE PARTITION FUNCTION pfTransaccionesPorAnio (INT)
+AS RANGE LEFT FOR VALUES (2020, 2021, 2022, 2023);
+
+Crear el Esquema de Partición
+
+CREATE PARTITION SCHEME psTransaccionesPorAnio
+AS PARTITION pfTransaccionesPorAnio ALL TO ([PRIMARY]);
+-------------------------------------------------------------------------------------------------------
+Creamos la Tabla Particionada
+La tabla utiliza el esquema de partición basado en el año de la columna FechaTransaccion.
+-------------------------------------------------------------------------------------------------------
+CREATE TABLE TransaccionesParticionadas
+(
+    TransaccionID INT PRIMARY KEY,
+    ClienteID INT NOT NULL,
+    Monto DECIMAL(10, 2),
+    FechaTransaccion DATE NOT NULL
+)
+ON psTransaccionesPorAnio (YEAR(FechaTransaccion));
+
+--Carga de datos distribuidos automáticamente en las particiones por año.
+
+INSERT INTO TransaccionesParticionadas (TransaccionID, ClienteID, Monto, FechaTransaccion)
+VALUES
+(1, 101, 250.50, '2020-05-15'),
+(2, 102, 320.75, '2021-08-22'),
+(3, 103, 500.00, '2022-11-11'),
+(4, 104, 100.00, '2023-01-01');
+
+Ejemplo de Consulta Optimizada:
+
+SELECT ClienteID, SUM(Monto) AS TotalMonto
+FROM TransaccionesParticionadas
+WHERE YEAR(FechaTransaccion) = 2023
+GROUP BY ClienteID;
+
+-------------------------------------------------------------------------------------------------------
+
+2 - Particionar una tabla simple de transacciones basada en el monto (Monto) para organizar mejor los datos según rangos predefinidos.
+
+CREATE PARTITION FUNCTION pfMontoTransacciones (DECIMAL(10, 2))
+AS RANGE RIGHT FOR VALUES (1000, 5000, 10000);
+
+Crear el Esquema de Partición
+Distribuye las particiones a los mismos archivos de almacenamiento.
+
+CREATE PARTITION SCHEME psMontoTransacciones
+AS PARTITION pfMontoTransacciones ALL TO ([PRIMARY]);
+
+CREATE TABLE TransaccionesParticionadas
+(
+    TransaccionID INT PRIMARY KEY,
+    ClienteID INT NOT NULL,
+    Monto DECIMAL(10, 2) NOT NULL,
+    FechaTransaccion DATE
+)
+ON psMontoTransacciones (Monto);
+
+INSERT INTO TransaccionesParticionadas (TransaccionID, ClienteID, Monto, FechaTransaccion)
+VALUES 
+(1, 101, 500.00, '2023-01-01'),
+(2, 102, 1500.00, '2023-01-02'),
+(3, 103, 7500.00, '2023-01-03'),
+(4, 104, 12000.00, '2023-01-04');
+
+--Consulta para Verificar Particiones
+
+SELECT *
+FROM TransaccionesParticionadas
+WHERE Monto BETWEEN 1000 AND 5000;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
